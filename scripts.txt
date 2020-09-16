@@ -1,0 +1,11 @@
+--run=speaker_frame --upstream=transformer --config=config/downstream_timit.yaml --ckpt=G:\MLData\S3PRL\mockingjay\MelBase-libri/states-500000.ckpt
+
+
+--run=speaker_frame --upstream=transformer --config=config/downstream.yaml --ckpt=G:\MLData\S3PRL\mockingjay\MelBase-libri/states-500000.ckpt
+
+
+
+
+preprocess
+
+python preprocess/preprocess_timit.py --feature_type=mel --data_path=G:\MLData\TIMIT --output_path=G:\MLData\

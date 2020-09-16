@@ -216,6 +216,7 @@ def main():
                     expdir=expdir)
     runner.set_model()
     runner.train()
+    runner.save_results('results.txt')
 
 
 if __name__ == '__main__':

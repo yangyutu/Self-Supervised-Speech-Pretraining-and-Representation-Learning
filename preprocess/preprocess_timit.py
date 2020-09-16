@@ -73,17 +73,29 @@ def preprocess(args, dim):
         cur_path = os.path.join(output_dir, s)
         if not os.path.exists(cur_path): os.makedirs(cur_path)
 
-
         print('Extracting acoustic feature...', flush=True)
-        tr_x = Parallel(n_jobs=args.n_jobs)(delayed(extract_feature)(str(file), feature=args.feature_type, \
-                                            delta=args.delta, delta_delta=args.delta_delta, cmvn=args.apply_cmvn, \
-                                            save_feature=os.path.join(cur_path, str(file).split('/')[-1].split('.')[0])) for file in tqdm(todo))
+        tr_x = []
+        for file in tqdm(todo):
+            name = str(file).split('\\')[-2] + '-' + str(file).split('\\')[-1].split('.')[0]
+            save_feature = os.path.join(cur_path, name)
+            length = extract_feature(str(file), feature=args.feature_type, delta=args.delta, delta_delta=args.delta_delta, cmvn=args.apply_cmvn, \
+                                            save_feature=save_feature)
+            tr_x.append(length)
+        # tr_x = Parallel(n_jobs=args.n_jobs)(delayed(extract_feature)(str(file), feature=args.feature_type, \
+        #                                     delta=args.delta, delta_delta=args.delta_delta, cmvn=args.apply_cmvn, \
+        #                                     save_feature=os.path.join(cur_path, str(file).split('/')[-1].split('.')[0])) for file in tqdm(todo))
 
         
         # sort by len
-        sorted_todo = [os.path.join(s, str(todo[idx]).split('/')[-1].split('.')[0]+'.npy') for idx in reversed(np.argsort(tr_x))]
+        sorted_todo = []
+        for idx in reversed(np.argsort(tr_x)):
+            file = todo[idx]
+            name = str(file).split('\\')[-2] + '-' + str(file).split('\\')[-1].split('.')[0] + '.npy'
+            filename = os.path.join(s, name)
+            sorted_todo.append(filename)
+        # sorted_todo = [os.path.join(s, str(todo[idx]).split('/')[-1].split('.')[0]+'.npy') for idx in reversed(np.argsort(tr_x))]
         # Dump data
-        df = pd.DataFrame(data={'file_path':[fp for fp in sorted_todo], 'length':list(reversed(sorted(tr_x))), 'label':None})
+        df = pd.DataFrame(data={'file_path':[fp for fp in sorted_todo], 'length': list(reversed(sorted(tr_x))), 'label':None})
         df.to_csv(os.path.join(output_dir, s+'.csv'))
 
     print('All done, saved at', output_dir, 'exit.')
@@ -99,7 +111,7 @@ def main():
     mel_dim = num_mels * (1 + int(args.delta) + int(args.delta_delta))
     mfcc_dim = num_mfcc * (1 + int(args.delta) + int(args.delta_delta))
     dim = num_freq if args.feature_type == 'linear' else (mfcc_dim if args.feature_type == 'mfcc' else mel_dim)
-    print('Delta: ', args.delta, '. Delta Delta: ', args.delta_delta, '. Cmvn: ', args.cmvn)
+    print('Delta: ', args.delta, '. Delta Delta: ', args.delta_delta, '. Cmvn: ', args.apply_cmvn)
 
     # Process data
     preprocess(args, dim)

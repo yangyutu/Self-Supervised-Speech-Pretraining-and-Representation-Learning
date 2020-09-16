@@ -18,7 +18,8 @@ from tqdm import tqdm
 from torch.optim import Adam
 from tensorboardX import SummaryWriter
 from downstream.solver import get_optimizer
-
+import collections
+import json
 
 ##########
 # RUNNER #
@@ -39,6 +40,12 @@ class Runner():
         self.upstream_model = upstream.to(self.device)
         self.downstream_model = downstream.to(self.device)
         self.expdir = expdir
+
+        self.results = collections.defaultdict(list)
+
+    def save_results(self, filename):
+        with open(filename, 'w') as json_file:
+            json.dump(self.results, json_file)
 
 
     def set_model(self):
@@ -159,6 +166,10 @@ class Runner():
                         self.log.add_scalar('loss', los, self.global_step)
                         self.log.add_scalar('gradient norm', grad_norm, self.global_step)
                         pbar.set_description('Loss %.5f, Acc %.5f' % (los, acc))
+
+                        self.results['global_step'].append(self.global_step)
+                        self.results['acc'].append(acc)
+                        self.results['loss'].append(acc)
 
                         loses = 0.0
                         corrects = 0
