@@ -169,7 +169,7 @@ class Runner():
 
                         self.results['global_step'].append(self.global_step)
                         self.results['acc'].append(acc)
-                        self.results['loss'].append(acc)
+                        self.results['loss'].append(los)
 
                         loses = 0.0
                         corrects = 0
@@ -186,6 +186,8 @@ class Runner():
                         eval_loss, eval_acc, _ = self.evaluate(split=self.config['evaluation'])
                         self.log.add_scalar(f"{self.config['evaluation']}_loss", eval_loss, self.global_step)
                         self.log.add_scalar(f"{self.config['evaluation']}_acc", eval_acc, self.global_step)
+                        self.results['eval_acc'].append(eval_acc)
+                        self.results['eval_loss'].append(eval_loss)
                         if eval_acc > best_eval_acc:
                             print('[Runner] - Saving new best model on: ', self.config['evaluation'])
                             self.save_model(save_best=f"best_{self.config['evaluation']}")

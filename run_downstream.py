@@ -216,7 +216,7 @@ def main():
                     expdir=expdir)
     runner.set_model()
     runner.train()
-    runner.save_results('results.txt')
+    runner.save_results(config['runner']['save_file'])
 
 
 if __name__ == '__main__':
